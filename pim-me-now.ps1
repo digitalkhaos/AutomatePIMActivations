@@ -1,28 +1,4 @@
-# *****************************************************************************************************************************************
-#     ____  ______  ___   __  _________   _   ______ _       __
-#    / __ \/  _/  |/  /  /  |/  / ____/  / | / / __ \ |     / /
-#   / /_/ // // /|_/ /  / /|_/ / __/    /  |/ / / / / | /| / / 
-#  / ____// // /  / /  / /  / / /___   / /|  / /_/ /| |/ |/ /  
-# /_/   /___/_/  /_/  /_/  /_/_____/  /_/ |_/\____/ |__/|__/   April 15, 2020
 $version = "0.1.1"
-# *****************************************************************************************************************************************
-# P i m M e N o w - PS Script to PIM you with comfort ;-)
-# 
-# Written by: Jan Geisbauer | Twitter: @janvonkirchheim | Blog: https://emptydc.com | Podcast: https://hairlessinthecloud.com 
-#
-# Blog Post on usage of PimMeNow: https://emptydc.com/2020/03/11/pim-me-now/
-# Get latest version on GitHub: https://github.com/jangeisbauer/PimMeNow
-#
-# Help By:
-# Counter comes from: http://blog.dbsnet.fr/countdown-in-a-powershell-gui
-# Thanks to Stephen Owen @foxdeploy for this post: https://foxdeploy.com/2014/09/18/adding-autocomplete-to-your-textbox-forms-in-powershell/
-#
-# *****************************************************************************************************************************************
-# Changelog
-# ----------------------------------------------------------------------------------------------------------------------------------------
-# 15. April 2020: add date & sessiondata to error log
-# ----------------------------------------------------------------------------------------------------------------------------------------
-
 
 # Your PIM Profiles
 $accounts = @(
@@ -32,13 +8,6 @@ $accounts = @(
     ("AdmLab GA","administrator@100pcloud.com","bf8xxxxxxxxxxxxxxxxxxxxxxxxc97","Profile 4","security administrator",2)
 )
 
-# Check if justification txt exits
-if (!(Test-Path "justificationreasons.txt"))
-{
-    New-Item -path justificationreasons.txt -type "file" 
-}
-
-$justification = Get-content 'justificationreasons.txt'
 $systemCheck = 0
 $Error.Clear()
 

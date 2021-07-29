@@ -1,76 +1,115 @@
-
-# Your PIM Profiles
 $accounts = @(
     ("John PInchin", "johnd@pinchin.com", "c4516901-933c-4b63-9f4b-69df48749dbb", "Global Reader", 8 ),
-    ("John PInchin", "johnd@pinchin.com", "c4516901-933c-4b63-9f4b-69df48749dbb", "Security Reader", 8 ),
     ("John Bulletproof", "john.devito@bulletproofsoc.com", "9a63d138-53ea-411b-be84-58b7e2570747", "Global Reader", 8)
-
-    # add pim account: name of profile, accountname, tenantID, profile-number edge, pim role, duration in hours
-    #("Jule Sec admin","jule@100pcloud.com","bf830bb0-fb9g-4081-9a9c-53859bc1dc97","Profile 5","security administrator",2), #default
-    #("Jule MSX admin","jule@100pcloud.com","bf8xxxxxxxxxxxxxxxxxxxxxxxxdc97","Profile 5","Exchange administrator",2), 
-    #("AdmLab GA","administrator@100pcloud.com","bf8xxxxxxxxxxxxxxxxxxxxxxxxc97","Profile 4","security administrator",2)
 )
 
-#initialzation
-$systemCheck = 0
+$sysCheck = 0
 $Error.Clear()
 
-# Check if PIM PS Module exists - if not install it
 if (Get-Module -ListAvailable -Name AzureADPreview) 
 {
-    $systemCheck = 1
+    $sysCheck = 1
 } 
 else 
 {
-    Write-Host "Module does not exist...installing"
+    Write-Host "Module does not exist"
     Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module AzureADPreview -force"
-    $systemCheck = 1
-    Write-Host "Done."
+    $sysCheck = 1
 }
 
-# check if we are ready
-if($systemCheck -eq 1)
-{  
-    foreach($account in $accounts) {
-        
-        # connect to PIM
+if($sysCheck -eq 1)
+{ 
+    Add-Type -AssemblyName System.Windows.Forms
+    Add-Type -AssemblyName System.Drawing
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = 'PimMeNow!'
+    $form.Size = New-Object System.Drawing.Size(580, 500)
+    $form.StartPosition = 'CenterScreen'
+    $form.Font = New-Object System.Drawing.Font("opensans", 9, [System.Drawing.FontStyle]::bold)
+
+    $OKButton = New-Object System.Windows.Forms.Button
+    $OKButton.Location = New-Object System.Drawing.Point(150, 360)
+    $OKButton.Size = New-Object System.Drawing.Size(75, 23)
+    $OKButton.Height = 50
+    $OKButton.Width = 120
+    $OKButton.Text = 'Cancel'
+    $OKButton.Text = 'OK'
+    $OKButton.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
+    $OKButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $form.AcceptButton = $OKButton
+    $form.Controls.Add($OKButton)
+
+    $OKButton.Add_Click(
+    {    
         $admin =  $accounts[$listBox.SelectedIndex][1].ToString()
         $TenantID =  $accounts[$listBox.SelectedIndex][2].ToString()
         $role =  $accounts[$listBox.SelectedIndex][3].ToString()
         $duration =  $accounts[$listBox.SelectedIndex][4].ToString()    
 
+        if($admin.Length -ne 0 -and $textBox.Text.Length -ne 0)
+        {
+            Import-Module azureadpreview
+            Connect-AzureAD -AccountId $admin
+            $oid = Get-AzureADUser -ObjectId $admin
+            
+            $roleToAssign=Get-AzureADMSPrivilegedRoleDefinition -ProviderId aadRoles -ResourceId $TenantID | Where-Object{$_.displayname -like $role}
 
-        # connect to azuread
-        Write-Host "Connecting..."
-        Import-Module azureadpreview
+            $schedule = New-Object Microsoft.Open.MSGraph.Model.AzureADMSPrivilegedSchedule
+            $schedule.Type = "Once"
+            $durationString = "PT" + $duration + "H" 
+            $schedule.Duration = $durationString
+            $schedule.StartDateTime = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
 
-        Connect-AzureAD -AccountId $admin
-        $oid = Get-AzureADUser -ObjectId $admin
-                    
-        # find roleassignment
-        $roleToAssign = Get-AzureADMSPrivilegedRoleDefinition -ProviderId aadRoles -ResourceId $TenantID | Where-Object{ $_.displayname -like $role }
+            Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $TenantID -RoleDefinitionId $roleToAssign.id -SubjectId $oid.objectID -Type 'UserAdd' -AssignmentState 'Active' -reason "security monitoring" -Schedule $schedule 
 
-        # prepare activation
-        $schedule = New-Object Microsoft.Open.MSGraph.Model.AzureADMSPrivilegedSchedule
-        $schedule.Type = "Once"
-        $durationString = "PT" + $duration + "H" 
-        $schedule.Duration = $durationString
-        $schedule.StartDateTime = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
-
-        # activate your role
-        Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $TenantID -RoleDefinitionId $roleToAssign.id -SubjectId $oid.objectID -Type 'UserAdd' -AssignmentState 'Active' -reason 'Security Monitoring' -Schedule $schedule 
-
-        # disconnect azuread
-        disconnect-azuread
+            disconnect-azuread
+        }
     }
+    )
+
+    $CancelButton = New-Object System.Windows.Forms.Button
+    $CancelButton.Location = New-Object System.Drawing.Point(300, 360)
+    $CancelButton.Size = New-Object System.Drawing.Size(75, 23)
+    $CancelButton.Height = 50
+    $CancelButton.Width = 120
+    $CancelButton.Text = 'Cancel'
+    $CancelButton.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
+    $CancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $form.CancelButton = $CancelButton
+    $form.Controls.Add($CancelButton)
+
+    $label = New-Object System.Windows.Forms.Label
+    $label.Location = New-Object System.Drawing.Point(10, 30)
+    $label.Size = New-Object System.Drawing.Size(280, 30)
+    $label.Text = 'Select an Account:'
+    $form.Controls.Add($label)
+ 
+    $listBox = New-Object System.Windows.Forms.ListBox
+    $listBox.Location = New-Object System.Drawing.Point(10, 60)
+    $listBox.Size = New-Object System.Drawing.Size(420, 10)
+    $listBox.Height = 200
+    $listBox.Width = 545
+    $listBox.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::Regular)
+    $form.Controls.Add($listBox)
+ 
+    $label2 = New-Object System.Windows.Forms.Label
+    $label2.Location = New-Object System.Drawing.Point(10, 270)
+    $label2.Size = New-Object System.Drawing.Size(280, 30)
+    $label2.Text = 'Justification:'
+
+    foreach($key in $accounts) 
+    {    
+        [void] $listBox.Items.Add($key[0].Tostring())
+    }
+
+    $listBox.SetSelected(0,$true)
+    $listBox.add_SelectedIndexChanged({$textBox.Focus()})
+    $form.Controls.Add($label2)
 }
 
-<#
- # listbox items
  $admin =  $accounts[$listBox.SelectedIndex][1].ToString()
- $duration =  $accounts[$listBox.SelectedIndex][4].ToString()   
+ $duration =  $accounts[$listBox.SelectedIndex][5].ToString()   
 
- # counter label
  $counterlabel = New-Object 'System.Windows.Forms.Label'
  $counterlabel.AutoSize = $True
  $counterlabel.Font = 'Open Sans, 24pt, style=Bold'
@@ -82,28 +121,26 @@ if($systemCheck -eq 1)
  $counterlabel.Text = $duration * 60
  $form.controls.Add($counterlabel)
 
- # rebuild form for counter
  $form.controls.Remove($LinkLabel)
  $form.controls.Remove($listBox)
  $form.controls.Remove($OKButton)
  $form.controls.Remove($CancelButton)
  $form.Controls.Remove($label2)
  $form.Controls.Remove($textBox)
- $form.Size = New-Object System.Drawing.Size(235,150)
- $form.Font = New-Object System.Drawing.Font("opensans",9,[System.Drawing.FontStyle]::Regular)
+ $form.Size = New-Object System.Drawing.Size(235, 150)
+ $form.Font = New-Object System.Drawing.Font("opensans", 9, [System.Drawing.FontStyle]::Regular)
 
- # reset label for counter
- $label.Size =  New-Object System.Drawing.Size(195,40) 
- $label.Location = New-Object System.Drawing.Point(10,20)
+ $label.Size =  New-Object System.Drawing.Size(195, 40) 
+ $label.Location = New-Object System.Drawing.Point(10, 20)
  $label.text = "Minutes until " + $admin + " gets deactivated:"
- $CancelButton.Location = New-Object System.Drawing.Point(0,30)
+ $CancelButton.Location = New-Object System.Drawing.Point(0, 30)
 
- # Pim Duration Counter
  function CountDown 
  {
-     $isNumeric = $counterlabel.Text -match '^\d+$'
-     if($isNumeric -eq $true)
-     {
+    $isNumeric = $counterlabel.Text -match '^\d+$'
+
+    if($isNumeric -eq $true)
+    {
         $counterlabel.Text -= 1
         If ($counterlabel.Text -eq 0) 
         {
@@ -113,17 +150,14 @@ if($systemCheck -eq 1)
     }
  }
 
-# Countdown is decreased every second
-$timer = New-Object System.Windows.Forms.Timer
-$timer.Interval = 60000
+$timer=New-Object System.Windows.Forms.Timer
+$timer.Interval=60000
 $timer.add_Tick({CountDown})
 $timer.Start()    
 
 [System.Windows.Forms.Application]::EnableVisualStyles()
 [System.Windows.Forms.Application]::Run($form)
-#>
 
-# error log
 if (!(Test-Path "errors.txt"))
 {
     New-Item -path errors.txt -type "file" 
@@ -131,8 +165,7 @@ if (!(Test-Path "errors.txt"))
 if($Error.count -ne 0)
 {
     $date = get-date
-    # add session data
-    $sessionData = "Admin: " + $admin + " | TenantID: " + $TenantID + " | Pim-Role: " + $role + " | Duration: " +$duration 
+    $sessionData = "Admin: " + $admin + " | TenantID: " + $TenantID + " | Profile: " + $edgeProfile + " | Pim-Role: " + $role + " | Duration: " +$duration 
     Add-Content -path errors.txt -value $date
     Add-Content -path errors.txt -value $sessionData
     Add-Content -path errors.txt -value $Error

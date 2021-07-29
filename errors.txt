@@ -122,3 +122,36 @@ Index operation failed; the array index evaluated to null.
 Index operation failed; the array index evaluated to null.
 Index operation failed; the array index evaluated to null.
 Index operation failed; the array index evaluated to null.
+7/15/2021 6:33:43 PM
+Admin:  | TenantID:  | Pim-Role:  | Duration: 
+Object reference not set to an instance of an object.
+Cannot bind argument to parameter 'ResourceId' because it is null.
+Cannot bind argument to parameter 'ResourceId' because it is null.
+Cannot bind argument to parameter 'ObjectId' because it is null.
+Cannot validate argument on parameter 'AccountId'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again.
+Index operation failed; the array index evaluated to null.
+Index operation failed; the array index evaluated to null.
+Index operation failed; the array index evaluated to null.
+Index operation failed; the array index evaluated to null.
+Object reference not set to an instance of an object.
+Cannot bind argument to parameter 'ResourceId' because it is null.
+Cannot bind argument to parameter 'ResourceId' because it is null.
+Cannot bind argument to parameter 'ObjectId' because it is null.
+Cannot validate argument on parameter 'AccountId'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again.
+Index operation failed; the array index evaluated to null.
+Index operation failed; the array index evaluated to null.
+Index operation failed; the array index evaluated to null.
+Index operation failed; the array index evaluated to null.
+Object reference not set to an instance of an object.
+Cannot bind argument to parameter 'ResourceId' because it is null.
+Cannot bind argument to parameter 'ResourceId' because it is null.
+Cannot bind argument to parameter 'ObjectId' because it is null.
+Cannot validate argument on parameter 'AccountId'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again.
+Index operation failed; the array index evaluated to null.
+Index operation failed; the array index evaluated to null.
+Index operation failed; the array index evaluated to null.
+Index operation failed; the array index evaluated to null.
+7/28/2021 8:35:53 PM
+Admin: john.devito@bulletproofsoc.com | TenantID:  | Profile:  | Pim-Role:  | Duration: 0
+You cannot call a method on a null-valued expression.
+You cannot call a method on a null-valued expression.
