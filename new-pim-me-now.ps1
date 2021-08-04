@@ -3,161 +3,113 @@ $accounts = @(
     ("John Bulletproof", "john.devito@bulletproofsoc.com", "9a63d138-53ea-411b-be84-58b7e2570747", "Global Reader", 8)
 )
 
-$sysCheck = 0
+$check = 0
 $Error.Clear()
 
 if (Get-Module -ListAvailable -Name AzureADPreview) 
 {
-    $sysCheck = 1
+    $check = 1
 } 
 else 
 {
     Write-Host "Module does not exist"
     Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module AzureADPreview -force"
-    $sysCheck = 1
+    $check = 1
 }
 
-if($sysCheck -eq 1)
-{ 
+if($check -eq 1)
+{
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
-    $form = New-Object System.Windows.Forms.Form
-    $form.Text = 'PimMeNow!'
-    $form.Size = New-Object System.Drawing.Size(580, 500)
-    $form.StartPosition = 'CenterScreen'
-    $form.Font = New-Object System.Drawing.Font("opensans", 9, [System.Drawing.FontStyle]::bold)
+    $mainForm = New-Object System.Windows.Forms.Form
+    $mainForm.Size = New-Object System.Drawing.Size(580, 500)
+    $mainForm.Text = 'Bulletproof Auto-Pim'
+    $mainForm.StartPosition = 'CenterScreen'
+    $mainForm.Font = New-Object System.Drawing.Font("opensans", 9, [System.Drawing.FontStyle]::bold)
 
-    $OKButton = New-Object System.Windows.Forms.Button
-    $OKButton.Location = New-Object System.Drawing.Point(150, 360)
-    $OKButton.Size = New-Object System.Drawing.Size(75, 23)
-    $OKButton.Height = 50
-    $OKButton.Width = 120
-    $OKButton.Text = 'Cancel'
-    $OKButton.Text = 'OK'
-    $OKButton.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
-    $OKButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-    $form.AcceptButton = $OKButton
-    $form.Controls.Add($OKButton)
-
-    $OKButton.Add_Click(
+    $OKBtn = New-Object System.Windows.Forms.Button
+    $OKBtn.Location = New-Object System.Drawing.Point(150, 360)
+    $OKBtn.Size = New-Object System.Drawing.Size(75, 23)
+    $OKBtn.Height = 50
+    $OKBtn.Width = 120
+    $OKBtn.Text = 'Cancel'
+    $OKBtn.Text = 'OK'
+    $OKBtn.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
+    $OKBtn.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $mainForm.AcceptButton = $OKBtn
+    $mainForm.Controls.Add($OKBtn)
+ 
+    $OKBtn.Add_Click(
     {    
-        $admin =  $accounts[$listBox.SelectedIndex][1].ToString()
+        $adm =  $accounts[$listBox.SelectedIndex][1].ToString()
         $TenantID =  $accounts[$listBox.SelectedIndex][2].ToString()
         $role =  $accounts[$listBox.SelectedIndex][3].ToString()
         $duration =  $accounts[$listBox.SelectedIndex][4].ToString()    
 
-        if($admin.Length -ne 0 -and $textBox.Text.Length -ne 0)
+        if($adm.Length -ne 0)
         {
             Import-Module azureadpreview
-            Connect-AzureAD -AccountId $admin
-            $oid = Get-AzureADUser -ObjectId $admin
-            
-            $roleToAssign=Get-AzureADMSPrivilegedRoleDefinition -ProviderId aadRoles -ResourceId $TenantID | Where-Object{$_.displayname -like $role}
+            Connect-AzureAD -AccountId $adm
+            $oid = Get-AzureADUser -ObjectId $adm
+            $roleAssigned = Get-AzureADMSPrivilegedRoleDefinition -ProviderId aadRoles -ResourceId $TenantID | Where-Object{$_.displayname -like $role}
 
-            $schedule = New-Object Microsoft.Open.MSGraph.Model.AzureADMSPrivilegedSchedule
-            $schedule.Type = "Once"
+            # prepare activation
+            $sched = New-Object Microsoft.Open.MSGraph.Model.AzureADMSPrivilegedsched
+            $sched.Type = "Once"
             $durationString = "PT" + $duration + "H" 
-            $schedule.Duration = $durationString
-            $schedule.StartDateTime = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+            $sched.Duration = $durationString
+            $sched.StartDateTime = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
 
-            Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $TenantID -RoleDefinitionId $roleToAssign.id -SubjectId $oid.objectID -Type 'UserAdd' -AssignmentState 'Active' -reason "security monitoring" -Schedule $schedule 
+            # activate your role
+            Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $TenantID -RoleDefinitionId $roleAssigned.id -SubjectId $oid.objectID -Type 'UserAdd' -AssignmentState 'Active' -reason 'security monitoring' -sched $sched 
 
             disconnect-azuread
         }
     }
     )
 
-    $CancelButton = New-Object System.Windows.Forms.Button
-    $CancelButton.Location = New-Object System.Drawing.Point(300, 360)
-    $CancelButton.Size = New-Object System.Drawing.Size(75, 23)
-    $CancelButton.Height = 50
-    $CancelButton.Width = 120
-    $CancelButton.Text = 'Cancel'
-    $CancelButton.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
-    $CancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
-    $form.CancelButton = $CancelButton
-    $form.Controls.Add($CancelButton)
+    $CancelBtn = New-Object System.Windows.Forms.Button
+    $CancelBtn.Location = New-Object System.Drawing.Point(300, 360)
+    $CancelBtn.Size = New-Object System.Drawing.Size(75, 23)
+    $CancelBtn.Height = 50
+    $CancelBtn.Width = 120
+    $CancelBtn.Text = 'Cancel'
+    $CancelBtn.Font = New-Object System.Drawing.Font("opensans",10,[System.Drawing.FontStyle]::bold)
+    $CancelBtn.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $mainForm.CancelBtn = $CancelBtn
+    $mainForm.Controls.Add($CancelBtn)
 
-    $label = New-Object System.Windows.Forms.Label
-    $label.Location = New-Object System.Drawing.Point(10, 30)
-    $label.Size = New-Object System.Drawing.Size(280, 30)
-    $label.Text = 'Select an Account:'
-    $form.Controls.Add($label)
- 
+    $lbl = New-Object System.Windows.Forms.lbl
+    $lbl.Location = New-Object System.Drawing.Point(10, 30)
+    $lbl.Size = New-Object System.Drawing.Size(280, 30)
+    $lbl.Text = 'Account:'
+    $mainForm.Controls.Add($lbl)
+
+    # Listbox with account / tenant pairs
     $listBox = New-Object System.Windows.Forms.ListBox
     $listBox.Location = New-Object System.Drawing.Point(10, 60)
     $listBox.Size = New-Object System.Drawing.Size(420, 10)
     $listBox.Height = 200
     $listBox.Width = 545
     $listBox.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::Regular)
-    $form.Controls.Add($listBox)
- 
-    $label2 = New-Object System.Windows.Forms.Label
-    $label2.Location = New-Object System.Drawing.Point(10, 270)
-    $label2.Size = New-Object System.Drawing.Size(280, 30)
-    $label2.Text = 'Justification:'
+    $mainForm.Controls.Add($listBox)
 
-    foreach($key in $accounts) 
+    # add items to listbox
+    foreach ($key in $accounts) 
     {    
         [void] $listBox.Items.Add($key[0].Tostring())
     }
 
-    $listBox.SetSelected(0,$true)
-    $listBox.add_SelectedIndexChanged({$textBox.Focus()})
-    $form.Controls.Add($label2)
+    # preselect listbox
+    $listBox.SetSelected(0, $true)
+    $mainForm.Controls.Add($lbl2)
+
+    # bring up mainForm
+    $mainForm.Add_Shown({$mainForm.Activate()})
+    $mainForm.ShowDialog()
 }
 
- $admin =  $accounts[$listBox.SelectedIndex][1].ToString()
- $duration =  $accounts[$listBox.SelectedIndex][5].ToString()   
-
- $counterlabel = New-Object 'System.Windows.Forms.Label'
- $counterlabel.AutoSize = $True
- $counterlabel.Font = 'Open Sans, 24pt, style=Bold'
- $counterlabel.Location = '5, 55'
- $counterlabel.Name = 'label000000'
- $counterlabel.Size = '208, 46'
- $counterlabel.TabIndex = 0
- $duration = $duration -as [int]
- $counterlabel.Text = $duration * 60
- $form.controls.Add($counterlabel)
-
- $form.controls.Remove($LinkLabel)
- $form.controls.Remove($listBox)
- $form.controls.Remove($OKButton)
- $form.controls.Remove($CancelButton)
- $form.Controls.Remove($label2)
- $form.Controls.Remove($textBox)
- $form.Size = New-Object System.Drawing.Size(235, 150)
- $form.Font = New-Object System.Drawing.Font("opensans", 9, [System.Drawing.FontStyle]::Regular)
-
- $label.Size =  New-Object System.Drawing.Size(195, 40) 
- $label.Location = New-Object System.Drawing.Point(10, 20)
- $label.text = "Minutes until " + $admin + " gets deactivated:"
- $CancelButton.Location = New-Object System.Drawing.Point(0, 30)
-
- function CountDown 
- {
-    $isNumeric = $counterlabel.Text -match '^\d+$'
-
-    if($isNumeric -eq $true)
-    {
-        $counterlabel.Text -= 1
-        If ($counterlabel.Text -eq 0) 
-        {
-            $timer.Stop()
-            $counterlabel.Text = "Deactivated!"
-        } 
-    }
- }
-
-$timer=New-Object System.Windows.Forms.Timer
-$timer.Interval=60000
-$timer.add_Tick({CountDown})
-$timer.Start()    
-
-[System.Windows.Forms.Application]::EnableVisualStyles()
-[System.Windows.Forms.Application]::Run($form)
-
+# error log
 if (!(Test-Path "errors.txt"))
 {
     New-Item -path errors.txt -type "file" 
@@ -165,7 +117,8 @@ if (!(Test-Path "errors.txt"))
 if($Error.count -ne 0)
 {
     $date = get-date
-    $sessionData = "Admin: " + $admin + " | TenantID: " + $TenantID + " | Profile: " + $edgeProfile + " | Pim-Role: " + $role + " | Duration: " +$duration 
+    # add session data
+    $sessionData = "adm: " + $adm + " | TenantID: " + $TenantID + " |  Pim-Role: " + $role + " | Duration: " +$duration 
     Add-Content -path errors.txt -value $date
     Add-Content -path errors.txt -value $sessionData
     Add-Content -path errors.txt -value $Error

@@ -155,3 +155,37 @@ Index operation failed; the array index evaluated to null.
 Admin: john.devito@bulletproofsoc.com | TenantID:  | Profile:  | Pim-Role:  | Duration: 0
 You cannot call a method on a null-valued expression.
 You cannot call a method on a null-valued expression.
+7/28/2021 9:02:30 PM
+Admin: johnd@pinchin.com | TenantID:  | Profile:  | Pim-Role:  | Duration: 0
+You cannot call a method on a null-valued expression.
+7/28/2021 9:03:33 PM
+Admin: johnd@pinchin.com | TenantID: System.Object[] | Profile:  | Pim-Role:  | Duration: 8
+You cannot call a method on a null-valued expression.
+7/29/2021 8:49:31 PM
+Admin: jule@100pcloud.com | TenantID:  | Profile:  | Pim-Role:  | Duration: 2
+You cannot call a method on a null-valued expression.
+7/29/2021 9:53:20 PM
+Admin: johnd@pinchin.com | TenantID: System.Object[] | Profile:  | Pim-Role:  | Duration: 8
+You cannot call a method on a null-valued expression.
+7/29/2021 9:53:59 PM
+Admin: johnd@pinchin.com | TenantID: System.Object[] | Profile:  | Pim-Role:  | Duration: 8
+You cannot call a method on a null-valued expression.
+7/29/2021 9:56:37 PM
+Admin: johnd@pinchin.com | TenantID: System.Object[] | Profile:  | Pim-Role:  | Duration: 8
+You cannot call a method on a null-valued expression.
+8/3/2021 9:40:44 PM
+Admin: johnd@pinchin.com | TenantID:  | Profile:  | Pim-Role:  | Duration: 0
+You cannot call a method on a null-valued expression.
+8/3/2021 10:29:07 PM
+Admin:  | TenantID:  | Profile:  | Pim-Role:  | Duration: 
+You cannot call a method on a null-valued expression.
+You cannot call a method on a null-valued expression.
+You cannot call a method on a null-valued expression.
+You cannot call a method on a null-valued expression.
+8/3/2021 10:37:56 PM
+adm:  | TenantID:  |  Pim-Role:  | Duration: 
+The property 'Text' cannot be found on this object. Verify that the property exists and can be set.
+The property 'Size' cannot be found on this object. Verify that the property exists and can be set.
+The property 'Location' cannot be found on this object. Verify that the property exists and can be set.
+Cannot find type [System.Windows.Forms.lbl]: verify that the assembly containing this type is loaded.
+The property 'CancelBtn' cannot be found on this object. Verify that the property exists and can be set.
