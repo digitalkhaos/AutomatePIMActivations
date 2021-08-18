@@ -1,9 +1,9 @@
 $version = "0.1.1"
 
 # Your PIM Profiles
-$accounts = @(
+$tenants = @(
     # add pim account: name of profile, accountname, tenantID, profile-number edge, pim role, duration in hours
-    ("Jule Sec admin","jule@100pcloud.com","bf830bb0-fb9g-4081-9a9c-53859bc1dc97","Profile 5","security administrator",2), #default
+    ("Jule Sec admin","jule@100pcloud.com","bf830bb0-fb9g-4081-9a9c-53859bc1dc97","Profile 5","security administrator",2),
     ("Jule MSX admin","jule@100pcloud.com","bf8xxxxxxxxxxxxxxxxxxxxxxxxdc97","Profile 5","Exchange administrator",2), 
     ("AdmLab GA","administrator@100pcloud.com","bf8xxxxxxxxxxxxxxxxxxxxxxxxc97","Profile 4","security administrator",2)
 )
@@ -99,11 +99,11 @@ if($systemCheck -eq 1)
     $OKButton.Add_Click(
         {    
             # connect to PIM
-            $admin =  $accounts[$listBox.SelectedIndex][1].ToString()
-            $TenantID =  $accounts[$listBox.SelectedIndex][2].ToString()
-            $edgeProfile = $accounts[$listBox.SelectedIndex][3].ToString()
-            $role =  $accounts[$listBox.SelectedIndex][4].ToString()
-            $duration =  $accounts[$listBox.SelectedIndex][5].ToString()    
+            $admin =  $tenants[$listBox.SelectedIndex][1].ToString()
+            $TenantID =  $tenants[$listBox.SelectedIndex][2].ToString()
+            $edgeProfile = $tenants[$listBox.SelectedIndex][3].ToString()
+            $role =  $tenants[$listBox.SelectedIndex][4].ToString()
+            $duration =  $tenants[$listBox.SelectedIndex][5].ToString()    
 
             if($admin.Length -ne 0 -and $textBox.Text.Length -ne 0)
             {
@@ -137,20 +137,20 @@ if($systemCheck -eq 1)
 
     # Cancel Button
     $CancelButton = New-Object System.Windows.Forms.Button
-    $CancelButton.Location = New-Object System.Drawing.Point(300,360)
-    $CancelButton.Size = New-Object System.Drawing.Size(75,23)
+    $CancelButton.Location = New-Object System.Drawing.Point(300, 360)
+    $CancelButton.Size = New-Object System.Drawing.Size(75, 23)
     $CancelButton.Height = 50
     $CancelButton.Width = 120
     $CancelButton.Text = 'Cancel'
-    $CancelButton.Font = New-Object System.Drawing.Font("opensans",10,[System.Drawing.FontStyle]::bold)
+    $CancelButton.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
     $CancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
     $form.CancelButton = $CancelButton
     $form.Controls.Add($CancelButton)
 
     # Select Account Label
     $label = New-Object System.Windows.Forms.Label
-    $label.Location = New-Object System.Drawing.Point(10,30)
-    $label.Size = New-Object System.Drawing.Size(280,30)
+    $label.Location = New-Object System.Drawing.Point(10, 30)
+    $label.Size = New-Object System.Drawing.Size(280, 30)
     $label.Text = 'Select an Account:'
     $form.Controls.Add($label)
 
@@ -160,7 +160,7 @@ if($systemCheck -eq 1)
     $listBox.Size = New-Object System.Drawing.Size(420,10)
     $listBox.Height = 200
     $listBox.Width = 545
-    $listBox.Font = New-Object System.Drawing.Font("opensans",10,[System.Drawing.FontStyle]::Regular)
+    $listBox.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::Regular)
     $form.Controls.Add($listBox)
 
     # justification text box
@@ -170,7 +170,7 @@ if($systemCheck -eq 1)
     $label2.Text = 'Justification:'
 
     # add items to listbox
-    foreach ($key in $accounts) 
+    foreach($key in $tenants) 
     {    
         [void] $listBox.Items.Add($key[0].Tostring())
     }
@@ -218,8 +218,8 @@ if($systemCheck -eq 1)
 }
 
  # listbox items
- $admin =  $accounts[$listBox.SelectedIndex][1].ToString()
- $duration =  $accounts[$listBox.SelectedIndex][5].ToString()   
+ $admin =  $tenants[$listBox.SelectedIndex][1].ToString()
+ $duration =  $tenants[$listBox.SelectedIndex][5].ToString()   
 
  # counter label
  $counterlabel = New-Object 'System.Windows.Forms.Label'
