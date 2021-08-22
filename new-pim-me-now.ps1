@@ -1,3 +1,11 @@
+<#
+    Bulletproof AUTO PIMS
+    by john 
+
+    TODO: Add all tenants
+    TODO:  
+#>
+
 $tenants = @(
     ("Pinchin", "johnd@pinchin.com", "c4516901-933c-4b63-9f4b-69df48749dbb"),
     ("Bulletproof", "john.devito@bulletproofsoc.com", "9a63d138-53ea-411b-be84-58b7e2570747")
@@ -25,10 +33,10 @@ if($check -eq 1)
     $mainForm.Size = New-Object System.Drawing.Size(400, 800)
     $mainForm.Text = 'Bulletproof Auto-PIM'
     $mainForm.StartPosition = 'CenterScreen'
-    $mainForm.Font = New-Object System.Drawing.Font("opensans", 9, [System.Drawing.FontStyle]::bold)
+    $mainForm.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
 
     $OKBtn = New-Object System.Windows.Forms.Button
-    $OKBtn.Location = New-Object System.Drawing.Point(50, 670)
+    $OKBtn.Location = New-Object System.Drawing.Point(50, 30)
     $OKBtn.Size = New-Object System.Drawing.Size(75, 23)
     $OKBtn.Height = 50
     $OKBtn.Width = 120
@@ -53,14 +61,14 @@ if($check -eq 1)
     $lbl = New-Object System.Windows.Forms.label
     $lbl.Location = New-Object System.Drawing.Point(10, 30)
     $lbl.Size = New-Object System.Drawing.Size(280, 30)
-    $lbl.Text = 'Account:'
+    $lbl.Text = 'Tenant:'
     $mainForm.Controls.Add($lbl)
 
     # tenantListBox with account / tenant pairs
     $tenantListBox = New-Object System.Windows.Forms.ListBox
     $tenantListBox.Location = New-Object System.Drawing.Point(10, 60)
     $tenantListBox.Size = New-Object System.Drawing.Size(420, 10)
-    $tenantListBox.Height = 600
+    $tenantListBox.Height = 285
     $tenantListBox.Width = 360
     $tenantListBox.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::Regular)
     $mainForm.Controls.Add($tenantListBox)
@@ -75,24 +83,36 @@ if($check -eq 1)
     $tenantListBox.SetSelected(0, $true)
     $mainForm.Controls.Add($lbl2)
 
+    $txt = New-Object System.Windows.Forms.TextBox
+    $txt.Location = New-Object System.Drawing.Point(10, 360)
+    $txt.Size = New-Object System.Drawing.Size(420, 10)
+    $txt.Multiline = $true
+    $txt.Height = 285
+    $txt.Width = 360
+    $txt.ReadOnly = $true
+    $mainForm.Controls.Add($txt)
+
     # bring up mainForm
     $mainForm.Add_Shown({$mainForm.Activate()})
     $mainForm.ShowDialog()
 
-    $OKBtn.Add_Click(
-    {    
+    $OKBtn.Add_Click({    
         $adm =  $tenants[$tenantListBox.SelectedIndex][1].ToString()
         $TenantID =  $tenants[$tenantListBox.SelectedIndex][2].ToString()    
 
-        Import-Module azureadpreview
+        Import-Module AzureADPreview
         Connect-AzureAD -AccountId $adm
+
+        $txt.Text = "Connected to $adm"
+
         $o_id = Get-AzureADUser -ObjectId $adm
-        $roleAssigned = Get-AzureADMSPrivilegedRoleDefinition -ProviderId aadRoles -ResourceId $TenantID | Where-Object{$_.displayname -like $role}
+
+        $roleAssigned = Get-AzureADMSPrivilegedRoleDefinition -ProviderId aadRoles -ResourceId $TenantID | Where-Object{$_.displayname -like "Global Reader"}
 
         # prepare activation
         $sched = New-Object Microsoft.Open.MSGraph.Model.AzureADMSPrivilegedsched
         $sched.Type = "Once"
-        $time_string = "PT" + $time + "H" 
+        $time_string = "PT" + 8 + "H" 
         $sched.time = $time_string
         $sched.StartDateTime = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
 
@@ -103,19 +123,4 @@ if($check -eq 1)
         
     }
     )
-}
-
-# error log
-if (!(Test-Path "errors.txt"))
-{
-    New-Item -path errors.txt -type "file" 
-}
-if($Error.count -ne 0)
-{
-    $date = get-date
-    # add session data
-    $sessionData = "adm: " + $adm + " | TenantID: " + $TenantID + " |  Pim-Role: " + $role + " | time: " +$time 
-    Add-Content -path errors.txt -value $date
-    Add-Content -path errors.txt -value $sessionData
-    Add-Content -path errors.txt -value $Error
 }

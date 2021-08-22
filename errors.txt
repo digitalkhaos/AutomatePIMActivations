@@ -298,3 +298,39 @@ The property 'Text' cannot be found on this object. Verify that the property exi
 The property 'Size' cannot be found on this object. Verify that the property exists and can be set.
 The property 'Location' cannot be found on this object. Verify that the property exists and can be set.
 Cannot find type [System.Windows.Forms.lbl]: verify that the assembly containing this type is loaded.
+8/20/2021 11:52:59 PM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'MulitLine' cannot be found on this object. Verify that the property exists and can be set.
+8/20/2021 11:53:18 PM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'Mulitline' cannot be found on this object. Verify that the property exists and can be set.
+8/21/2021 12:06:40 AM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'ReszizeMode' cannot be found on this object. Verify that the property exists and can be set.
+8/21/2021 12:07:11 AM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'ResizeMode' cannot be found on this object. Verify that the property exists and can be set.
+8/21/2021 12:07:16 AM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'Resizemode' cannot be found on this object. Verify that the property exists and can be set.
+8/21/2021 10:40:59 PM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'Resizemode' cannot be found on this object. Verify that the property exists and can be set.
+8/21/2021 10:42:58 PM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'Resizemode' cannot be found on this object. Verify that the property exists and can be set.
+8/21/2021 10:44:53 PM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'Resizemode' cannot be found on this object. Verify that the property exists and can be set.
+8/21/2021 10:45:24 PM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'Resizemode' cannot be found on this object. Verify that the property exists and can be set.
+8/21/2021 11:00:30 PM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'Resizemode' cannot be found on this object. Verify that the property exists and can be set.
+8/21/2021 11:03:36 PM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'Resizemode' cannot be found on this object. Verify that the property exists and can be set.
+8/21/2021 11:05:26 PM
+adm:  | TenantID:  |  Pim-Role:  | time: 
+The property 'Resizemode' cannot be found on this object. Verify that the property exists and can be set.
