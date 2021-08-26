@@ -334,3 +334,6 @@ The property 'Resizemode' cannot be found on this object. Verify that the proper
 8/21/2021 11:05:26 PM
 adm:  | TenantID:  |  Pim-Role:  | time: 
 The property 'Resizemode' cannot be found on this object. Verify that the property exists and can be set.
+8/22/2021 4:56:35 PM
+Admin: jule@100pcloud.com | TenantID:  | Profile:  | Pim-Role:  | Duration: 2
+You cannot call a method on a null-valued expression.
