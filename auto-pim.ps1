@@ -24,31 +24,7 @@ else
     Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module AzureADPreview -force"
     $check = 1
 }
-
-Function Show-ActiveRoles {
-    $CurrentRoles = Get-PrivilegedRoleAssignment | Where-Object {(
-        $_.ExpirationTime
-        )} | Select-Object RoleName, ExpirationTime, RoleID | ForEach-Object {
-            $BaseTime = [DateTime]$_.ExpirationTime;
-            $_.ExpirationTime = $BaseTime;
-            Return $PSItem
-    }        
     
-    If (-Not ($CurrentRoles)) {
-        Write-Host "The requested role needs approval before it will be active" -ForegroundColor Yellow
-    }
-    
-    ForEach ($Role in $CurrentRoles) {
-        Write-Host "You now have the privileged role:       " -ForegroundColor Green -NoNewline
-        Write-Host $($Role.RoleName) -ForegroundColor Green
-            
-        Write-Host "The privileged role is valid until:     " -ForegroundColor Green -NoNewline
-        Write-Host  $($Role.ExpirationTime) -ForegroundColor Green
-        Write-Host
-    }
-}
-    
-
 if($check -eq 1)
 {
     Add-Type -AssemblyName System.Windows.Forms
