@@ -11,21 +11,18 @@ $tenants = @(
     ("Bulletproof", "john.devito@bulletproofsoc.com", "9a63d138-53ea-411b-be84-58b7e2570747", "adff98f3-fe9d-45c3-a53c-05769a2669fb")
 )
 
-$check = 0
-$Error.Clear()
-
 if (Get-Module -ListAvailable -Name AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule)
 {
-    $check = 1
+    $readyCheck = 1
 } 
 else 
 {
     Write-Host "Module does not exist"
     Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module AzureADPreview -force"
-    $check = 1
+    $readyCheck = 1
 }
     
-if($check -eq 1)
+if($readyCheck -eq 1)
 {
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
@@ -48,35 +45,31 @@ if($check -eq 1)
     $mainForm.Controls.Add($ActivateButton)
 
     $ActivateButton.Add_Click({ 
-        $TenantName = $tenants[$tenantListBox.SelectedIndex][0].ToString()   
+        $tenantName = $tenants[$tenantListBox.SelectedIndex][0].ToString()   
         $adm =  $tenants[$tenantListBox.SelectedIndex][1].ToString()
-        $TenantID =  $tenants[$tenantListBox.SelectedIndex][2].ToString()
-        $ObjectID =  $tenants[$tenantListBox.SelectedIndex][3].ToString()    
+        $tenantID =  $tenants[$tenantListBox.SelectedIndex][2].ToString()
+        $objectID =  $tenants[$tenantListBox.SelectedIndex][3].ToString()    
 
-        $txt.Text = "value of adm: $adm`n" 
-        $FilterOn = "subjectId eq $ObjectID"
+        $txt.Text = "Connected to: $tenantName as 
+        $adm`n" 
 
-        $cred = Get-Credential
-        Connect-AzureAD -Credential $cred
+        Connect-AzureAD
 
-        Get-AzureADMSPrivilegedRoleAssignment -ProviderID aadRoles -ResourceID $TenantID  -Filter $FilterOn | Write-Host
+        Get-AzureADMSPrivilegedRoleAssignment -ProviderID aadRoles -ResourceID $tenantID  -Filter "subjectId eq $objectID" | Format-table -AutoSize
 
-        $txt.AppendText("Connected to $TenantName")
-        
-        
     }
     )
     
-    $CancelBtn = New-Object System.Windows.Forms.Button
-    $CancelBtn.Location = New-Object System.Drawing.Point(200, 670)
-    $CancelBtn.Size = New-Object System.Drawing.Size(75, 23)
-    $CancelBtn.Height = 50
-    $CancelBtn.Width = 120
-    $CancelBtn.Text = 'Cancel'
-    $CancelBtn.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
-    $CancelBtn.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
-    $mainForm.CancelButton = $CancelBtn
-    $mainForm.Controls.Add($CancelBtn)
+    $cancelBtn = New-Object System.Windows.Forms.Button
+    $cancelBtn.Location = New-Object System.Drawing.Point(200, 670)
+    $cancelBtn.Size = New-Object System.Drawing.Size(75, 23)
+    $cancelBtn.Height = 50
+    $cancelBtn.Width = 120
+    $cancelBtn.Text = 'Cancel'
+    $cancelBtn.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
+    $cancelBtn.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $mainForm.CancelButton = $cancelBtn
+    $mainForm.Controls.Add($cancelBtn)
 
     $lbl = New-Object System.Windows.Forms.label
     $lbl.Location = New-Object System.Drawing.Point(10, 30)
