@@ -8,7 +8,7 @@
 
 $tenants = @(
     ("Pinchin", "soc-john@pinchin.com", "c4516901-933c-4b63-9f4b-69df48749dbb", "32d3f793-2252-46d3-9f5f-26274c2f342d"),
-    ("Bulletproof", "john.devito@bulletproofsoc.com", "9a63d138-53ea-411b-be84-58b7e2570747", "adff98f3-fe9d-45c3-a53c-05769a2669fb")
+    ("Bulletproof", "john.devito@bulletproofsoc.com", "9a63d138-53ea-411b-be84-58b7e2570747", "32d3f793-2252-46d3-9f5f-26274c2f342d")
 )
 
 if (Get-Module -ListAvailable -Name AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule)
@@ -32,30 +32,34 @@ if($readyCheck -eq 1)
     $mainForm.StartPosition = 'CenterScreen'
     $mainForm.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
 
-    $ActivateButton = New-Object System.Windows.Forms.Button
-    $ActivateButton.Location = New-Object System.Drawing.Point(50, 670)
-    $ActivateButton.Size = New-Object System.Drawing.Size(75, 23)
-    $ActivateButton.Height = 50
-    $ActivateButton.Width = 120
-    $ActivateButton.Text = 'Cancel'
-    $ActivateButton.Text = 'Activate'
-    $ActivateButton.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
-    #$ActivateButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-    #$mainForm.AcceptButton = $ActivateButton
-    $mainForm.Controls.Add($ActivateButton)
+    $activateBtn = New-Object System.Windows.Forms.Button
+    $activateBtn.Location = New-Object System.Drawing.Point(50, 670)
+    $activateBtn.Size = New-Object System.Drawing.Size(75, 23)
+    $activateBtn.Height = 50
+    $activateBtn.Width = 120
+    $activateBtn.Text = 'Cancel'
+    $activateBtn.Text = 'Activate'
+    $activateBtn.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
+    $mainForm.Controls.Add($activateBtn)
 
-    $ActivateButton.Add_Click({ 
+    $schedule = New-Object Microsoft.Open.MSGraph.Model.AzureADMSPrivilegedSchedule
+    $schedule.Type = "Once"
+    $schedule.StartDateTime = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+    $schedule.endDateTime = "2021-09-01T04:59:59.770Z"
+
+    $activateBtn.Add_Click({ 
         $tenantName = $tenants[$tenantListBox.SelectedIndex][0].ToString()   
         $adm =  $tenants[$tenantListBox.SelectedIndex][1].ToString()
         $tenantID =  $tenants[$tenantListBox.SelectedIndex][2].ToString()
         $objectID =  $tenants[$tenantListBox.SelectedIndex][3].ToString()    
 
-        $txt.Text = "Connected to: $tenantName as 
-        $adm`n" 
+        $txtBox.Text = "Connected to: $tenantName as $adm`n" 
 
         Connect-AzureAD
 
-        Get-AzureADMSPrivilegedRoleAssignment -ProviderID aadRoles -ResourceID $tenantID  -Filter "subjectId eq $objectID" | Format-table -AutoSize
+        Get-AzureADMSPrivilegedRoleAssignment -ProviderID aadRoles -ResourceID "9a63d138-53ea-411b-be84-58b7e2570747" -Filter "subjectId eq '32d3f793-2252-46d3-9f5f-26274c2f342d'" | Write-Host
+
+        Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId '9a63d138-53ea-411b-be84-58b7e2570747' -RoleDefinitionId 'f2ef992c-3afb-46b9-b7cf-a126ee74c451' -SubjectId '32d3f793-2252-46d3-9f5f-26274c2f342d' -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
 
     }
     )
@@ -96,14 +100,14 @@ if($readyCheck -eq 1)
     $tenantListBox.SetSelected(0, $true)
     $mainForm.Controls.Add($lbl2)
 
-    $txt = New-Object System.Windows.Forms.TextBox
-    $txt.Location = New-Object System.Drawing.Point(10, 360)
-    $txt.Size = New-Object System.Drawing.Size(420, 10)
-    $txt.Multiline = $true
-    $txt.Height = 285
-    $txt.Width = 360
-    $txt.ReadOnly = $true
-    $mainForm.Controls.Add($txt)
+    $txtBox = New-Object System.Windows.Forms.TextBox
+    $txtBox.Location = New-Object System.Drawing.Point(10, 360)
+    $txtBox.Size = New-Object System.Drawing.Size(420, 10)
+    $txtBox.Multiline = $true
+    $txtBox.Height = 285
+    $txtBox.Width = 360
+    $txtBox.ReadOnly = $true
+    $mainForm.Controls.Add($txtBox)
 
     # bring up mainForm
     $mainForm.Add_Shown({$mainForm.Activate()})
