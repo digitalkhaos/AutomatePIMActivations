@@ -37,7 +37,6 @@ if($readyCheck -eq 1)
     $activateBtn.Size = New-Object System.Drawing.Size(75, 23)
     $activateBtn.Height = 50
     $activateBtn.Width = 120
-    $activateBtn.Text = 'Cancel'
     $activateBtn.Text = 'Activate'
     $activateBtn.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
     $mainForm.Controls.Add($activateBtn)
@@ -59,7 +58,7 @@ if($readyCheck -eq 1)
 
         Get-AzureADMSPrivilegedRoleAssignment -ProviderID aadRoles -ResourceID "9a63d138-53ea-411b-be84-58b7e2570747" -Filter "subjectId eq '32d3f793-2252-46d3-9f5f-26274c2f342d'" | Write-Host
 
-        Open-AzureADMSPrivilegedRoleAssignment -ProviderId 'aadRoles' -ResourceId '9a63d138-53ea-411b-be84-58b7e2570747' -RoleDefinitionId 'f2ef992c-3afb-46b9-b7cf-a126ee74c451' -SubjectId '32d3f793-2252-46d3-9f5f-26274c2f342d' -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
+        Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId '9a63d138-53ea-411b-be84-58b7e2570747' -RoleDefinitionId 'f2ef992c-3afb-46b9-b7cf-a126ee74c451' -SubjectId '32d3f793-2252-46d3-9f5f-26274c2f342d' -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
 
     }
     )
