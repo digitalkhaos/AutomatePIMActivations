@@ -57,12 +57,13 @@ if($readyCheck -eq 1)
 
         Connect-AzureAD
 
-        Get-AzureADMSPrivilegedRoleAssignment -ProviderID aadRoles -ResourceID "9a63d138-53ea-411b-be84-58b7e2570747" -Filter "subjectId eq '32d3f793-2252-46d3-9f5f-26274c2f342d'" | Write-Host
+        Get-AzureADMSPrivilegedRoleAssignment -ProviderID aadRoles -ResourceID "9a63d138-53ea-411b-be84-58b7e2570747" -Filter "subjectId eq '32d3f793-2252-46d3-9f5f-26274c2f342d'" | foreach-object {
+            $txtBox.Text += "Role: $_.RoleAssignment.RoleDefinitionId`n"
+        }
 
         Open-AzureADMSPrivilegedRoleAssignment -ProviderId 'aadRoles' -ResourceId '9a63d138-53ea-411b-be84-58b7e2570747' -RoleDefinitionId 'f2ef992c-3afb-46b9-b7cf-a126ee74c451' -SubjectId '32d3f793-2252-46d3-9f5f-26274c2f342d' -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
 
-    }
-    )
+    })
     
     $cancelBtn = New-Object System.Windows.Forms.Button
     $cancelBtn.Location = New-Object System.Drawing.Point(200, 670)
