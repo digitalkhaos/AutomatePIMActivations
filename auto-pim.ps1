@@ -1,24 +1,47 @@
-chrome<#
+<#
     Bulletproof AUTO PIMs                  
-    by john 
+    by bulletprood soc
 
-    TODO: Add all tenants
+    TODO: requires statements
     TODO:  
+
+    $GLobalReaderRole = 'f2ef992c-3afb-46b9-b7cf-a126ee74c451'
+    $SecurityReaderRole = '5d6b6bb7-de71-4623-b4af-96380a352509'
+    $SecurityAdministratorRole = '194ae4cb-b126-40b2-bd5b-6091b380977d'
+    $HelpdeskAdministratorRole = '729827e3-9c14-49f7-bb1b-9608f156bbb8'
 #>
 
 $tenants = @(
-    ("Pinchin", "soc-john@pinchin.com", "c4516901-933c-4b63-9f4b-69df48749dbb", "32d3f793-2252-46d3-9f5f-26274c2f342d"),
-    ("Bulletproof", "john.devito@bulletproofsoc.com", "9a63d138-53ea-411b-be84-58b7e2570747", "32d3f793-2252-46d3-9f5f-26274c2f342d")
+    ("Pinchin", "c4516901-933c-4b63-9f4b-69df48749dbb", "adff98f3-fe9d-45c3-a53c-05769a2669fb"),
+    ("Bulletproof", "9a63d138-53ea-411b-be84-58b7e2570747", "32d3f793-2252-46d3-9f5f-26274c2f342d"),
+    ("Colliers", "049e3382-8cdc-477b-9317-951b04689668","db71a9ec-c370-4d04-b2ca-0d6cf6d3c900"),
+    ("Gaming Labs", "00ba7ca4-fc6d-4d83-b18b-1460659aa27f","5ba8696a-a998-4372-965a-21966b0dc478"),
+    ("OSCO", "0ee60ac4-5059-4f1c-857c-a9c4d2daab23","bc7973ad-6fb2-44c3-adff-bdea73d933e1"),
+    ("Saint Johns", "aea3b21f-bb9b-4220-aad8-be4853beaa41","622c239c-ab5e-4562-8438-b731ffb078de"),
+    ("Barrington", "cad398a2-a2cb-4b5a-937d-b3272385c40f","1213b785-60ba-40e8-a9bb-0697223f7b08"),
+    ("CAA Atlantic", "081df473-6051-4752-b907-0771955b2fb5","13e5c075-c1ba-4f6a-baef-d0a9828c0aec"),
+    ("Engineering", "e36e2432-b327-457a-bb91-2c778cfcb631","c44bb9d7-6b80-4e67-b595-51074a9b6686")
+    ("Project Leaders", "e74c4d20-b67d-4981-8c32-09fbc95f970f", "ad355bf5-7cfe-4a48-a5b5-de3955584f1a"),
+    ("Colliers Test", "32fde73e-d008-4c64-9dae-3c75284e7b02","7850aa40-21be-416e-b06a-a0bf3eef6b34"),
+    ("Cupe", "e96558c0-737b-417b-94e6-c6e2afe5b005","2b001a87-d0af-452d-8ccc-3211967d7251"),
+    ("Edmunton", "ec76ae32-319a-4ab8-8520-b711c24b9a50","151360bc-b1f1-4a47-a2cc-3f26daa7e28d"),
+    ("Trevali", "239d993c-3c12-4070-b892-0a39e3e0a0a3","d268bc73-2781-4153-b229-5e4c6301956e"),
+    ("Uni", "a86d09ed-c313-4200-a4db-ae6b219e5bae","d04d0d2c-0777-4452-8fca-af5374b3cc04"),
+    ("Loundsbury", "79f89a32-1845-41a8-bb88-0b2490a71c14","fd6ad5b4-2485-43dd-8dff-791b44f4c336"),
+    ("Larco", "5c75effe-0780-49d7-99be-5e9e23c75d81","2f82634b-0f40-4fa8-9f55-1109f04c061a"),
+    ("Wilson", "6fca3bf6-4214-454c-9b03-329295b56cbc","ffdf575e-74bb-4357-9569-3c525dad87a9")
 )
 
 if (Get-Module -ListAvailable -Name AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule)
 {
+    Import-Module AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule
     $readyCheck = 1
 } 
 else 
 {
     Write-Host "Module does not exist"
     Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module AzureADPreview -force"
+    Import-Module -Name AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule
     $readyCheck = 1
 }
     
@@ -48,19 +71,51 @@ if($readyCheck -eq 1)
 
     $activateBtn.Add_Click({ 
         $tenantName = $tenants[$tenantListBox.SelectedIndex][0].ToString()   
-        $adm =  $tenants[$tenantListBox.SelectedIndex][1].ToString()
-        $tenantID =  $tenants[$tenantListBox.SelectedIndex][2].ToString()
-        $objectID =  $tenants[$tenantListBox.SelectedIndex][3].ToString()    
+        $tenantID =  $tenants[$tenantListBox.SelectedIndex][1].ToString()
+        $objectID =  $tenants[$tenantListBox.SelectedIndex][2].ToString()   
+        $userID = "`'" + $objectID + "`'"
 
-        $txtBox.Text = "Connected to: $tenantName as $adm`n" 
+        #Roles
+        $GlobalReaderRole = 'f2ef992c-3afb-46b9-b7cf-a126ee74c451'
+        $SecurityAdministratorRole = '194ae4cb-b126-40b2-bd5b-6091b380977d'
+        $HelpdeskAdministratorRole = '729827e3-9c14-49f7-bb1b-9608f156bbb8'
+     
+        $txtBox.Text = "Connecting to: $tenantName`r`n" 
 
-        Connect-AzureAD
-
-        Get-AzureADMSPrivilegedRoleAssignment -ProviderID aadRoles -ResourceID "9a63d138-53ea-411b-be84-58b7e2570747" -Filter "subjectId eq '32d3f793-2252-46d3-9f5f-26274c2f342d'" | foreach-object {
-            $txtBox.Text += "Role: $_.RoleAssignment.RoleDefinitionId`n"
+        if(Connect-AzureAD){
+            $txtBox.Text += "Connected to $tenantName`r`n"
+        }
+        else {
+            $txtBox.Text += "Failed to connect to $tenantName`r`n"
+            return
         }
 
-        Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId '9a63d138-53ea-411b-be84-58b7e2570747' -RoleDefinitionId 'f2ef992c-3afb-46b9-b7cf-a126ee74c451' -SubjectId '32d3f793-2252-46d3-9f5f-26274c2f342d' -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
+        $txtBox.Text += "`r`nAvailable Roles:`r`n"
+
+        Get-AzureADMSPrivilegedRoleDefinition -ProviderID aadRoles -ResourceID $tenantID -Filter "subjectId eq $userID" | foreach-object {
+                $txtBox.Text += "`r`nRole: $_.AssignedRole.RoleDefinitionId`r`n"
+        }
+
+        if(Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $GlobalReaderRole -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"){
+            $txtBox.Text += "`r`nActivated Global Reader Role`r`n"
+        }
+        else {
+            $txtBox.Text += "`r`nFailed to activate Global Reader Role`r`n"
+        }
+
+        if(Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $SecurityAdministratorRole -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"){
+            $txtBox.Text += "`r`nActivated Security Administrator Role`r`n"
+        }
+        else {
+            $txtBox.Text += "`r`nFailed to activate Security Administrator Role`r`n"
+        }
+
+        if(Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $HelpDeskAdministratorRole -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"){
+            $txtBox.Text += "`r`nActivated Helpdesk Administrator Role`r`n"
+        }
+        else {
+            $txtBox.Text += "`r`nFailed to activate Helpdesk Administrator Role`r`n"
+        }
     })
     
     $cancelBtn = New-Object System.Windows.Forms.Button
@@ -92,7 +147,7 @@ if($readyCheck -eq 1)
     # add items to tenantListBox
     foreach ($item in $tenants) 
     {    
-         [void] $tenantListBox.Items.Add($item[0].Tostring())
+         $tenantListBox.Items.Add($item[0].Tostring())
     }
 
     # preselect tenantListBox
@@ -106,6 +161,7 @@ if($readyCheck -eq 1)
     $txtBox.Height = 285
     $txtBox.Width = 360
     $txtBox.ReadOnly = $true
+    $txtBox.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
     $mainForm.Controls.Add($txtBox)
 
     # bring up mainForm
