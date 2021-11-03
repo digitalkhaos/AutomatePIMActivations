@@ -11,6 +11,22 @@
     $HelpdeskAdministratorRole = '729827e3-9c14-49f7-bb1b-9608f156bbb8'
 
 #>
+#Requires -Version 5.0
+#Requires -Modules AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule
+
+
+if (Get-Module -ListAvailable -Name AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule)
+{
+    Import-Module AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule
+    $readyCheck = 1
+} 
+else 
+{
+    Write-Host "Module does not exist"
+    Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module AzureADPreview -force"
+    Import-Module -Name AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule
+    $readyCheck = 1
+}
 
 # ("Name", "TenantID, "ObjectID", "AccountID")
 $tenants = @(
@@ -26,26 +42,13 @@ $tenants = @(
     ("Project Leaders", "e74c4d20-b67d-4981-8c32-09fbc95f970f", "ad355bf5-7cfe-4a48-a5b5-de3955584f1a", "soc-john.devito@colliersprojectleaders.com"),
     ("Colliers Test", "32fde73e-d008-4c64-9dae-3c75284e7b02","7850aa40-21be-416e-b06a-a0bf3eef6b34", "soc-john.devito@collierstest.com"),
     ("Cupe", "e96558c0-737b-417b-94e6-c6e2afe5b005","2b001a87-d0af-452d-8ccc-3211967d7251", "soc-john.devito@cupe.onmicrosoft.com"),
-    ("Edmunton", "ec76ae32-319a-4ab8-8520-b711c24b9a50","151360bc-b1f1-4a47-a2cc-3f26daa7e28d", "soc-john.devito@edmusdston.ca"),
+    ("Edmunton", "ec76ae32-319a-4ab8-8520-b711c24b9a50","151360bc-b1f1-4a47-a2cc-3f26daa7e28d", "soc-john.devito@edmundston.ca"),
     ("Trevali", "239d993c-3c12-4070-b892-0a39e3e0a0a3","d268bc73-2781-4153-b229-5e4c6301956e", "soc-john.devito@trevali.com"),
     ("Uni", "a86d09ed-c313-4200-a4db-ae6b219e5bae","d04d0d2c-0777-4452-8fca-af5374b3cc04", "soc-john.devito@uni365.ca"),
     ("Loundsbury", "79f89a32-1845-41a8-bb88-0b2490a71c14","fd6ad5b4-2485-43dd-8dff-791b44f4c336", "spc-johnd@lounsburygroup.onmicrosoft.com"),
     ("Larco", "5c75effe-0780-49d7-99be-5e9e23c75d81","2f82634b-0f40-4fa8-9f55-1109f04c061a", "soc-johnd@mlpm1.ca"),
     ("Wilson", "6fca3bf6-4214-454c-9b03-329295b56cbc","ffdf575e-74bb-4357-9569-3c525dad87a9", "soc-johnd@wilson.nb.ca")
 )
-
-if (Get-Module -ListAvailable -Name AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule)
-{
-    Import-Module AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule
-    $readyCheck = 1
-} 
-else 
-{
-    Write-Host "Module does not exist"
-    Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module AzureADPreview -force"
-    Import-Module -Name AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule
-    $readyCheck = 1
-}
     
 if($readyCheck -eq 1)
 {
@@ -140,7 +143,7 @@ if($readyCheck -eq 1)
     
         if($SecurityAdministratorFlag -eq 1){
             try{
-                Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $SecurityAdministratorRole.Id -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Eligible' -schedule $schedule -reason "security monitoring"
+                Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $SecurityAdministratorRole.Id -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
                 $txtBox.Text += "`r`nActivated Security Administrator Role`r`n"
             }
             catch {
@@ -154,7 +157,7 @@ if($readyCheck -eq 1)
 
         if($HelpdeskAdministratorFlag -eq 1){
             try{
-                Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $HelpDeskAdministratorRole.Id -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Eligible' -schedule $schedule -reason "security monitoring"
+                Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $HelpDeskAdministratorRole.Id -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
                 $txtBox.Text += "`r`nActivated Helpdesk Administrator Role`r`n"
             }
             catch{
