@@ -1,33 +1,44 @@
 <#
     Bulletproof AUTO PIMs                  
     by bulletprood soc
-
-    TODO: requires statements
-    TODO:  
-
-    $GLobalReaderRole = 'f2ef992c-3afb-46b9-b7cf-a126ee74c451'
-    $SecurityReaderRole = '5d6b6bb7-de71-4623-b4af-96380a352509'
-    $SecurityAdministratorRole = '194ae4cb-b126-40b2-bd5b-6091b380977d'
-    $HelpdeskAdministratorRole = '729827e3-9c14-49f7-bb1b-9608f156bbb8'
-
 #>
+
 #Requires -Version 5.0
-#Requires -Modules AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule
+
+$GlobalReaderFlag = 0
+$SecurityAdministratorFlag = 0
+$HelpdeskAdministratorFlag = 0
+$ADPreviewFlag = 0
+$PIMModuleFlag = 0
 
 
-if (Get-Module -ListAvailable -Name AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule)
-{
-    Import-Module AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule
-    $readyCheck = 1
-} 
-else 
-{
-    Write-Host "Module does not exist"
+try {
+    Get-Module -ListAvailable -Name AzureADPreview 
+    Import-Module -Name AzureADPreview
+    $ADPreviewFlag = 1
+}
+catch { 
+    Write-Host "Installing Module: AzureADPreview"
     Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module AzureADPreview -force"
-    Import-Module -Name AzureADPreview, Microsoft.Azure.ActiveDirectory.PIM.PSModule
-    $readyCheck = 1
+    Import-Module -Name AzureADPreview
+    $ADPreviewFlag = 1
 }
 
+try {
+    Get-Module -ListAvailable -Name Microsoft.Azure.ActiveDirectory.PIM.PSModule
+    Import-Module -Name Microsoft.Azure.ActiveDirectory.PIM.PSModule
+    $PIMModuleFlag = 1
+} 
+catch {
+    Write-Host "Installing Module: Microsoft.Azure.ActiveDirectory.PIM.PSModule"
+    Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module Microsoft.Azure.ActiveDirectory.PIM.PSModule -force"
+    Import-Module -Name Microsoft.Azure.ActiveDirectory.PIM.PSModule
+    $PIMModuleFlag = 1
+}
+
+
+
+#TODO: move this out of code into a text/jason/xml file all new hires fill out
 # ("Name", "TenantID, "ObjectID", "AccountID")
 $tenants = @(
     ("Pinchin", "c4516901-933c-4b63-9f4b-69df48749dbb", "adff98f3-fe9d-45c3-a53c-05769a2669fb", "soc-john@pinchin.com"),
@@ -50,8 +61,7 @@ $tenants = @(
     ("Wilson", "6fca3bf6-4214-454c-9b03-329295b56cbc","ffdf575e-74bb-4357-9569-3c525dad87a9", "soc-johnd@wilson.nb.ca")
 )
     
-if($readyCheck -eq 1)
-{
+if(($ADPreviewFlag) -eq 1 -and ($PIMModuleFlag -eq 1)) {
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
     $mainForm = New-Object System.Windows.Forms.Form
@@ -78,12 +88,7 @@ if($readyCheck -eq 1)
         $tenantName = $tenants[$tenantListBox.SelectedIndex][0].ToString()   
         $tenantID =  $tenants[$tenantListBox.SelectedIndex][1].ToString()
         $objectID =  $tenants[$tenantListBox.SelectedIndex][2].ToString()
-        $accountID = $tenants[$tenantListBox.SelectedIndex][3].ToString()   
-        #$userID = "`'" + $objectID + "`'"
-        
-        $GlobalReaderFlag = 0
-        $SecurityAdministratorFlag = 0
-        $HelpdeskAdministratorFlag = 0
+        $accountID = $tenants[$tenantListBox.SelectedIndex][3].ToString()  
 
         $txtBox.Text = "Connecting to: $tenantName`r`n" 
         
@@ -122,17 +127,17 @@ if($readyCheck -eq 1)
             $txtBox.Text += "`r`nHelpdesk Administrator Available`r`n"
             $HelpdeskAdministratorFlag = 1
         }
-        catch{
+        catch {
             $txtBox.Text += "`r`nHelpdesk Administrator not available`r`n"
             $HelpdeskAdministratorFlag = 0
         }
 
         if($GlobalReaderFlag -eq 1){
-            try{
+            try {
                 Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $GlobalReaderRole.Id -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
                 $txtBox.Text += "`r`n`r`nActivated Global Reader `r`n"
             }
-            catch{
+            catch {
                 $txtBox.Text += "`r`nFailed to activate Global Reader Role`r`n"
             }
         }
@@ -142,7 +147,7 @@ if($readyCheck -eq 1)
         }
     
         if($SecurityAdministratorFlag -eq 1){
-            try{
+            try {
                 Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $SecurityAdministratorRole.Id -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
                 $txtBox.Text += "`r`nActivated Security Administrator Role`r`n"
             }
@@ -156,11 +161,11 @@ if($readyCheck -eq 1)
         }
 
         if($HelpdeskAdministratorFlag -eq 1){
-            try{
+            try {
                 Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $HelpDeskAdministratorRole.Id -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
                 $txtBox.Text += "`r`nActivated Helpdesk Administrator Role`r`n"
             }
-            catch{
+            catch {
                 $txtBox.Text += "`r`nFailed to activate Helpdesk Administrator Role`r`n"
             }
         }
