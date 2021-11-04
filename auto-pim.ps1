@@ -5,39 +5,45 @@
 
 #Requires -Version 5.0
 
-$GlobalReaderFlag = 0
-$SecurityAdministratorFlag = 0
-$HelpdeskAdministratorFlag = 0
-$ADPreviewFlag = 0
-$PIMModuleFlag = 0
+$GlobalReaderFlag = $false
+$SecurityAdministratorFlag = $false
+$HelpdeskAdministratorFlag = $false
+$ADPreviewFlag = $false
+$PIMModuleFlag = $false
 
-
-try {
-    Get-Module -ListAvailable -Name AzureADPreview 
-    Import-Module -Name AzureADPreview
-    $ADPreviewFlag = 1
+try{
+    Import-Module -Name PowerShellGet
+    $initflag = $true
 }
-catch { 
-    Write-Host "Installing Module: AzureADPreview"
-    Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module AzureADPreview -force"
-    Import-Module -Name AzureADPreview
-    $ADPreviewFlag = 1
+catch{
+    Write-Host "This script requires the PowerShellGet module. Installing..."
+    Install-Module -Name PowerShellGet -Force
+    $initflag = $true
 }
 
-try {
-    Get-Module -ListAvailable -Name Microsoft.Azure.ActiveDirectory.PIM.PSModule
-    Import-Module -Name Microsoft.Azure.ActiveDirectory.PIM.PSModule
-    $PIMModuleFlag = 1
-} 
-catch {
-    Write-Host "Installing Module: Microsoft.Azure.ActiveDirectory.PIM.PSModule"
-    Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module Microsoft.Azure.ActiveDirectory.PIM.PSModule -force"
-    Import-Module -Name Microsoft.Azure.ActiveDirectory.PIM.PSModule
-    $PIMModuleFlag = 1
+if($initflag -eq $true){
+    try { 
+        Import-Module -Name AzureADPreview
+        $ADPreviewFlag = $true
+    }
+    catch { 
+        Write-Host "Installing Module: AzureADPreview"
+        Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module AzureADPreview -force"
+        Import-Module -Name AzureADPreview
+        $ADPreviewFlag = $true
+    }
+
+    try {
+        Import-Module -Name Microsoft.Azure.ActiveDirectory.PIM.PSModule
+        $PIMModuleFlag = $true
+    } 
+    catch {
+        Write-Host "Installing Module: Microsoft.Azure.ActiveDirectory.PIM.PSModule"
+        Start-Process -Verb RunAs -FilePath powershell.exe -ArgumentList "install-module Microsoft.Azure.ActiveDirectory.PIM.PSModule -force"
+        Import-Module -Name Microsoft.Azure.ActiveDirectory.PIM.PSModule
+        $PIMModuleFlag = $true
+    }
 }
-
-
-
 #TODO: move this out of code into a text/jason/xml file all new hires fill out
 # ("Name", "TenantID, "ObjectID", "AccountID")
 $tenants = @(
@@ -61,7 +67,7 @@ $tenants = @(
     ("Wilson", "6fca3bf6-4214-454c-9b03-329295b56cbc","ffdf575e-74bb-4357-9569-3c525dad87a9", "soc-johnd@wilson.nb.ca")
 )
     
-if(($ADPreviewFlag) -eq 1 -and ($PIMModuleFlag -eq 1)) {
+if(($ADPreviewFlag) -eq $true -and ($PIMModuleFlag -eq $true)) {
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
     $mainForm = New-Object System.Windows.Forms.Form
@@ -105,31 +111,31 @@ if(($ADPreviewFlag) -eq 1 -and ($PIMModuleFlag -eq 1)) {
         try{
             $GlobalReaderRole = Get-AzureADMSPrivilegedRoleDefinition -ProviderId aadRoles -ResourceId $tenantID | Where-Object {$_.DisplayName -eq 'Global Reader'}
             $txtBox.Text += "`r`nGlobal Reader Available`r`n"
-            $GlobalReaderFlag = 1
+            $GlobalReaderFlag = $true
         }
         catch{
             $txtBox.Text += "`r`nGlobal Reader not available`r`n"
-            $GlobalReaderFlag = 0
+            $GlobalReaderFlag = $false
         }
         
         try{
             $SecurityAdministratorRole = Get-AzureADMSPrivilegedRoleDefinition -ProviderId aadRoles -ResourceId $tenantID | Where-Object {$_.DisplayName -eq 'Security Administrator'}
             $txtBox.Text += "`r`nSecurity Administrator Available`r`n"
-            $SecurityAdministratorFlag = 1
+            $SecurityAdministratorFlag = $true
         }
         catch{
             $txtBox.Text += "`r`nSecurity Administrator not available`r`n"
-            $SecurityAdministratorFlag = 0
+            $SecurityAdministratorFlag = $false
         }
 
         try{
             $HelpdeskAdministratorRole = Get-AzureADMSPrivilegedRoleDefinition -ProviderId aadRoles -ResourceId $tenantID | Where-Object {$_.DisplayName -eq 'Helpdesk Administrator'}
             $txtBox.Text += "`r`nHelpdesk Administrator Available`r`n"
-            $HelpdeskAdministratorFlag = 1
+            $HelpdeskAdministratorFlag = $true
         }
         catch {
             $txtBox.Text += "`r`nHelpdesk Administrator not available`r`n"
-            $HelpdeskAdministratorFlag = 0
+            $HelpdeskAdministratorFlag = $false
         }
 
         if($GlobalReaderFlag -eq 1){
@@ -146,7 +152,7 @@ if(($ADPreviewFlag) -eq 1 -and ($PIMModuleFlag -eq 1)) {
             return
         }
     
-        if($SecurityAdministratorFlag -eq 1){
+        if($SecurityAdministratorFlag -eq $true){
             try {
                 Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $SecurityAdministratorRole.Id -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
                 $txtBox.Text += "`r`nActivated Security Administrator Role`r`n"
@@ -160,7 +166,7 @@ if(($ADPreviewFlag) -eq 1 -and ($PIMModuleFlag -eq 1)) {
             return
         }
 
-        if($HelpdeskAdministratorFlag -eq 1){
+        if($HelpdeskAdministratorFlag -eq $true){
             try {
                 Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $tenantID -RoleDefinitionId $HelpDeskAdministratorRole.Id -SubjectId $objectID -Type 'UserAdd' -AssignmentState 'Active' -schedule $schedule -reason "security monitoring"
                 $txtBox.Text += "`r`nActivated Helpdesk Administrator Role`r`n"
