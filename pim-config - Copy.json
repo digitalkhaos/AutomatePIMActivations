@@ -1,0 +1,11 @@
+{
+    "tenants":
+    [
+       {
+          "name":"<Tenant Name>",
+          "tenantID":"<KEY GOES HERE>",
+          "objectID":"<KEY GOES HERE>",
+          "accountID":"<Login Name>"
+       }
+    ]
+ }
