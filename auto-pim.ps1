@@ -1,8 +1,3 @@
-<#
-    Bulletproof AUTO PIMs                  
-    by bulletprood soc.......
-#>
-
 #Requires -Version 5.0
 $GlobalReaderFlag = $false
 $SecurityAdministratorFlag = $false
@@ -57,7 +52,7 @@ if(($ADPreviewFlag) -eq $true -and ($PIMModuleFlag -eq $true)) {
     Add-Type -AssemblyName System.Drawing
     $mainForm = New-Object System.Windows.Forms.Form
     $mainForm.Size = New-Object System.Drawing.Size(400, 800)
-    $mainForm.Text = 'Bulletproof Auto-PIM'
+    $mainForm.Text = 'Auto-PIM'
     $mainForm.StartPosition = 'CenterScreen'
     $mainForm.Font = New-Object System.Drawing.Font("opensans", 10, [System.Drawing.FontStyle]::bold)
     $mainForm.FormBorderStyle = 'FixedSingle'
@@ -75,7 +70,7 @@ if(($ADPreviewFlag) -eq $true -and ($PIMModuleFlag -eq $true)) {
     $schedule.StartDateTime = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
     $schedule.Duration = "PT8H"
 
-    $pimconfig = Get-Content "C:\Users\bsi534\Sentinel Repo\Sentinel\SOC Tools\Auto-PIM\pim-config.json" | Out-String | ConvertFrom-Json
+    $pimconfig = Get-Content "<PATH_TO_configfile>" | Out-String | ConvertFrom-Json
 
     $activateBtn.Add_Click({ 
         $tenantName = $pimconfig.tenants[$tenantListBox.SelectedIndex].name  
